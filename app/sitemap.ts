@@ -1,7 +1,6 @@
 import type { MetadataRoute } from "next";
+import { siteUrl as base } from "@/lib/site-url";
 import { POSTS } from "./_data";
-
-const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://blog.everrest.ai";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

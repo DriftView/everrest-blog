@@ -1,3 +1,5 @@
+import { envUrl } from "./site-url";
+
 // External destinations. GrowthHub is its own deployment, so every link back
 // to the marketing site and the apps is absolute.
 const FALLBACK = {
@@ -7,9 +9,9 @@ const FALLBACK = {
 } as const;
 
 export const appLinks = {
-  main: process.env.NEXT_PUBLIC_MAIN_SITE_URL ?? FALLBACK.main,
-  user: process.env.NEXT_PUBLIC_USER_APP_URL ?? FALLBACK.user,
-  partner: process.env.NEXT_PUBLIC_PARTNER_APP_URL ?? FALLBACK.partner,
+  main: envUrl(process.env.NEXT_PUBLIC_MAIN_SITE_URL, FALLBACK.main),
+  user: envUrl(process.env.NEXT_PUBLIC_USER_APP_URL, FALLBACK.user),
+  partner: envUrl(process.env.NEXT_PUBLIC_PARTNER_APP_URL, FALLBACK.partner),
 };
 
 export const mainLink = (path = "") => `${appLinks.main}${path}`;

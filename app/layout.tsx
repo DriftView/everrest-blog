@@ -3,6 +3,7 @@ import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { QueryProvider } from "@/lib/query-provider";
+import { siteUrl } from "@/lib/site-url";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -10,7 +11,6 @@ const title = "The EverRest Journal";
 const description =
   "Stories, insights and guidance for navigating loss and preparing for the future — from care advisors, funeral directors and grief counsellors.";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://blog.everrest.ai";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
