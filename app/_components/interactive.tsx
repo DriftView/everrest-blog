@@ -484,6 +484,10 @@ export function TestimonialCarousel({ stories }: { stories: Story[] }) {
 }
 
 /* ─── Newsletter opt-in (lead capture) ───────────────────────────── */
+// Where the API lives, and which capture point this is (recorded per signup).
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
+const NEWSLETTER_SOURCE = "blog";
+
 const newsletterSchema = z.object({
   email: z.string().email("Enter a valid email address"),
   consent: z.literal(true, { message: "Please confirm you'd like to receive occasional emails" }),
@@ -497,6 +501,7 @@ export function NewsletterSignup({ tone = "light" }: { tone?: "light" | "dark" }
   const mutedColor = dark ? "rgba(255,255,255,0.6)" : "var(--ink-4)";
   const doneColor = dark ? "rgba(255,255,255,0.85)" : "var(--ink-2)";
   const [done, setDone] = React.useState(false);
+  const [failed, setFailed] = React.useState(false);
   const {
     register,
     handleSubmit,
@@ -506,11 +511,20 @@ export function NewsletterSignup({ tone = "light" }: { tone?: "light" | "dark" }
     defaultValues: { email: "", consent: false as unknown as true },
   });
 
-  const onSubmit = async () => {
-    // No marketing backend is wired yet — capture succeeds locally and
-    // shows confirmation. Point this at the email provider when available.
-    await new Promise((r) => setTimeout(r, 400));
-    setDone(true);
+  const onSubmit = async (values: NewsletterValues) => {
+    setFailed(false);
+    try {
+      const res = await fetch(`${API_BASE}/newsletter/subscribe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: values.email, consent: true, source: NEWSLETTER_SOURCE }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      setDone(true);
+    } catch {
+      // Never pretend it worked — the address would be lost silently.
+      setFailed(true);
+    }
   };
 
   if (done) {
@@ -588,9 +602,11 @@ export function NewsletterSignup({ tone = "light" }: { tone?: "light" | "dark" }
           Send me occasional planning guidance and grief-support resources. No spam; unsubscribe anytime.
         </span>
       </label>
-      {(errors.email || errors.consent) && (
-        <div style={{ marginTop: 8, fontSize: 12, color: dark ? "#F2A08A" : "var(--danger)" }}>
-          {errors.email?.message ?? errors.consent?.message}
+      {(errors.email || errors.consent || failed) && (
+        <div role="alert" style={{ marginTop: 8, fontSize: 12, color: dark ? "#F2A08A" : "var(--danger)" }}>
+          {errors.email?.message ??
+            errors.consent?.message ??
+            "We couldn't sign you up just now. Please try again in a moment."}
         </div>
       )}
     </form>
